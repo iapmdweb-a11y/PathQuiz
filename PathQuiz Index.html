@@ -95,13 +95,7 @@
   .desc{color:var(--muted);font-size:.85rem;margin:2px 0 0}
   .meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:auto;padding-top:14px}
   .chip{font-size:.68rem;font-weight:600;background:#f1f3f7;color:var(--ink-2);border-radius:999px;padding:4px 10px}
-  .go{color:var(--accent);font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
-  .live{
-    position:relative;z-index:2;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
-    color:var(--ink);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:4px 10px;
-    display:inline-flex;align-items:center;gap:5px;background:#fff;
-  }
-  .live:hover{border-color:var(--accent);color:var(--accent)}
+  .go{margin-left:auto;color:var(--accent);font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
 
   .empty{background:var(--card);border:1px dashed #cbd2dc;border-radius:18px;padding:34px;text-align:center;color:var(--muted)}
   .empty strong{display:block;font-family:'Cormorant Garamond',serif;font-size:1.25rem;color:var(--ink);margin-bottom:6px}
@@ -154,6 +148,7 @@
 <script>
 /* ------------------------------------------------------------------
    TO ADD A NEW QUIZ: append one object to SECTIONS below. Nothing else.
+   Every card links straight to the live quiz on iapmd.net.
    ------------------------------------------------------------------ */
 const SECTIONS = [
   {
@@ -163,14 +158,13 @@ const SECTIONS = [
     blurb: 'Test Your Diagnostic Skills &bull; Master Cytology',
     items: [
       {
-        file: 'cytology-bethesda-battle.html',
         url: 'https://www.iapmd.net/bethesda-battle',
         title: 'Bethesda Battle',
         desc: 'Cervical cytology quiz on the Bethesda System for Reporting Cervical Cytology.',
         badge: 'CytoQuiz',
         date: 'September 24, 2026',
         image: 'https://cdn1.artcltn.com/storage/25635/a233962a-ffe4-4e35-a0f2-86c48caa4ff2/bethesda_battle6ab5752cc4300.jpg',
-        chips: ['21 questions', 'Timed', 'Explanations']
+        chips: ['20 questions', '30s timer', 'Certificate']
       }
     ]
   },
@@ -181,7 +175,6 @@ const SECTIONS = [
     blurb: 'Test Your Diagnostic Skills &bull; Learn Dermatopathology',
     items: [
       {
-        file: 'dermpath-melanoma-variants.html',
         url: 'https://www.iapmd.net/melanoma-variants',
         title: 'Melanoma Variants',
         desc: 'Flashcards on 21 melanoma subtypes with diagnostic clues, morphology and molecular notes.',
@@ -198,9 +191,6 @@ function cardHTML(item) {
   const chips = (item.chips || [])
     .map(c => '<span class="chip">' + c + '</span>')
     .join('');
-  const live = item.url
-    ? `<a class="live" href="${item.url}" target="_blank" rel="noopener">iapmd.net &#8599;</a>`
-    : '';
   return `
     <div class="card">
       <div class="thumb">
@@ -209,9 +199,9 @@ function cardHTML(item) {
       </div>
       <div class="body">
         <span class="date">${item.date}</span>
-        <h3><a href="${item.file}">${item.title}</a></h3>
+        <h3><a href="${item.url}" target="_blank" rel="noopener">${item.title}</a></h3>
         <p class="desc">${item.desc}</p>
-        <div class="meta">${chips}${live}<span class="go" style="margin-left:auto">Start &rarr;</span></div>
+        <div class="meta">${chips}<span class="go">Start &rarr;</span></div>
       </div>
     </div>`;
 }
