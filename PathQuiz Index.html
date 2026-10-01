@@ -87,7 +87,6 @@
     display:inline-flex;align-items:center;gap:6px;
   }
   .thumb .badge svg{width:16px;height:16px;flex:none;display:block}
-  .qi{width:16px;height:16px;flex:none;display:block}
   .body{padding:18px 18px 20px;display:flex;flex-direction:column;gap:6px;flex:1}
   .date{color:var(--muted);font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
   .body h3{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.5rem;font-weight:600;margin:0;line-height:1.1}
@@ -160,7 +159,6 @@ const SECTIONS = [
         title: 'Bethesda Battle',
         desc: 'Cervical cytology quiz on the Bethesda System for Reporting Cervical Cytology.',
         badge: 'CytoQuiz',
-        icon: 'icons/cyto-quiz.svg',
         date: 'September 24, 2026',
         image: 'https://cdn1.artcltn.com/storage/25635/a233962a-ffe4-4e35-a0f2-86c48caa4ff2/bethesda_battle6ab5752cc4300.jpg',
         chips: ['21 questions', 'Timed', 'Explanations']
@@ -178,7 +176,6 @@ const SECTIONS = [
         title: 'Melanoma Variants',
         desc: 'Flashcards on 21 melanoma subtypes with diagnostic clues, morphology and molecular notes.',
         badge: 'Dermpath Quiz',
-        icon: 'icons/dermpath-quiz.svg',
         date: 'September 12, 2025',
         image: 'https://cdn1.artcltn.com/storage/25635/a233962a-ffe4-4e35-a0f2-86c48caa4ff2/quiz2.png',
         chips: ['21 cards', 'Image-based', 'Shuffle']
@@ -191,14 +188,11 @@ function cardHTML(item) {
   const chips = (item.chips || [])
     .map(c => '<span class="chip">' + c + '</span>')
     .join('');
-  const icon = item.icon
-    ? '<img class="qi" src="' + item.icon + '" alt="" aria-hidden="true">'
-    : '';
   return `
     <a class="card" href="${item.file}">
       <div class="thumb">
         <img src="${item.image}" alt="${item.title}" loading="lazy">
-        <span class="badge">${icon}${item.badge}</span>
+        <span class="badge">${item.badge}</span>
       </div>
       <div class="body">
         <span class="date">${item.date}</span>
