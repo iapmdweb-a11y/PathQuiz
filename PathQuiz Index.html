@@ -43,13 +43,43 @@
     background:var(--ink);color:#fff;border-bottom:3px solid var(--accent);
     position:sticky;top:0;z-index:20;
   }
-  .topbar-inner{display:flex;align-items:center;gap:14px;padding:12px 0}
+  .topbar .wrap{padding-left:32px;padding-right:32px}
+  .topbar-inner{display:flex;align-items:center;gap:14px;padding:16px 0}
   .logo{height:34px;width:auto;display:block}
   .brand{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.5rem;font-weight:700;letter-spacing:.01em;line-height:1}
   .brand small{display:block;font-family:'Inter',sans-serif;font-size:.6rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;opacity:.6;margin-top:4px}
-  .topbar nav{margin-left:auto;display:flex;gap:18px;flex-wrap:wrap}
-  .topbar nav a{color:rgba(255,255,255,.72);text-decoration:none;font-size:.78rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:6px 0;border-bottom:2px solid transparent}
-  .topbar nav a:hover{color:#fff;border-bottom-color:var(--accent)}
+  .topbar nav{margin-left:auto;display:flex;gap:6px;align-items:center}
+  .nav-item{position:relative}
+  .nav-btn{
+    display:inline-flex;align-items:center;gap:6px;background:none;border:0;cursor:pointer;
+    color:rgba(255,255,255,.72);font:inherit;font-size:.78rem;font-weight:600;
+    letter-spacing:.06em;text-transform:uppercase;padding:8px 10px;border-radius:8px;
+  }
+  .nav-btn:hover,.nav-item.open > .nav-btn{color:#fff;background:rgba(255,255,255,.1)}
+  .nav-btn .caret{width:8px;height:8px;flex:none;transition:transform .2s ease;opacity:.7}
+  .nav-item.open .caret{transform:rotate(180deg)}
+  .nav-menu{
+    position:absolute;right:0;top:calc(100% + 8px);min-width:250px;z-index:30;
+    background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px;
+    box-shadow:0 18px 40px -14px rgba(27,27,42,.4);
+    display:none;
+  }
+  .nav-item.open .nav-menu{display:block}
+  .nav-menu a{
+    display:block;text-decoration:none;color:var(--ink);padding:9px 11px;border-radius:8px;
+    font-size:.85rem;font-weight:600;line-height:1.3;
+  }
+  .nav-menu a:hover{background:#f4f2ff;color:var(--accent)}
+  .nav-menu a span{display:block;font-size:.68rem;font-weight:500;color:var(--muted);margin-top:2px}
+  .nav-menu .all{
+    border-top:1px solid var(--line);border-radius:0;margin-top:6px;padding-top:11px;
+    font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);
+  }
+  .topbar nav > a{
+    color:rgba(255,255,255,.72);text-decoration:none;font-size:.78rem;font-weight:600;
+    letter-spacing:.06em;text-transform:uppercase;padding:8px 10px;border-radius:8px;
+  }
+  .topbar nav > a:hover{color:#fff;background:rgba(255,255,255,.1)}
 
   .hero{padding:52px 0 34px;text-align:center}
   .hero h1{
@@ -101,13 +131,17 @@
   .empty strong{display:block;font-family:'Cormorant Garamond',serif;font-size:1.25rem;color:var(--ink);margin-bottom:6px}
   .empty code{background:#f1f3f7;border-radius:6px;padding:2px 7px;font-size:.78rem}
 
-  footer{background:var(--ink);color:rgba(255,255,255,.66);padding:30px 0;font-size:.78rem}
+  footer .wrap{padding-left:32px;padding-right:32px}
+  footer{background:var(--ink);color:rgba(255,255,255,.66);padding:34px 0;font-size:.78rem}
   .foot-inner{display:flex;gap:16px;flex-wrap:wrap;align-items:center;justify-content:space-between}
   footer a{color:#fff;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.3)}
   footer a:hover{border-bottom-color:var(--accent)}
 
   @media (max-width:640px){
-    .topbar nav{display:none}
+    .topbar .wrap{padding-left:20px;padding-right:20px}
+    .topbar-inner{flex-wrap:wrap;padding:14px 0}
+    .topbar nav{margin-left:0;width:100%;justify-content:flex-start}
+    .nav-menu{right:auto;left:0}
     .hero{padding:38px 0 26px}
   }
 </style>
@@ -118,9 +152,7 @@
   <div class="wrap topbar-inner">
     <img class="logo" src="https://cdn1.artcltn.com/storage/25635/a233962a-ffe4-4e35-a0f2-86c48caa4ff2/smoothed-logo-1.png" alt="IAPMD">
     <div class="brand">PathQuiz<small>IAP-MD</small></div>
-    <nav>
-      <a href="#cytology">Cytology</a>
-      <a href="#dermpath">DermPath</a>
+    <nav id="nav">
       <a href="https://www.iapmd.net/path-quiz" target="_blank" rel="noopener">iapmd.net</a>
     </nav>
   </div>
@@ -222,6 +254,44 @@ document.getElementById('app').innerHTML = SECTIONS.map(sec => {
       ${cards}
     </section>`;
 }).join('');
+
+/* ---------- top nav, generated from SECTIONS ---------- */
+const CARET = '<svg class="caret" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M1.5 3.5 5 7l3.5-3.5"/></svg>';
+
+const navLinks = SECTIONS.map(sec => `
+  <div class="nav-item">
+    <button class="nav-btn" type="button" aria-haspopup="true" aria-expanded="false">${sec.tag}${CARET}</button>
+    <div class="nav-menu" role="menu">
+      ${sec.items.map(i => `
+        <a href="${i.url}" target="_blank" rel="noopener" role="menuitem">${i.title}<span>${i.badge} &middot; ${i.date}</span></a>
+      `).join('')}
+      <a class="all" href="#${sec.id}">View all ${sec.tag} &rarr;</a>
+    </div>
+  </div>`).join('');
+
+const nav = document.getElementById('nav');
+nav.insertAdjacentHTML('afterbegin', navLinks);
+
+nav.addEventListener('click', e => {
+  const btn = e.target.closest('.nav-btn');
+  const group = e.target.closest('.nav-item');
+  if (group) {
+    const open = group.classList.contains('open');
+    closeAll();
+    if (!open) { group.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
+  } else if (!e.target.closest('.nav-menu')) {
+    closeAll();
+  }
+});
+
+function closeAll() {
+  nav.querySelectorAll('.nav-item').forEach(g => {
+    g.classList.remove('open');
+    g.querySelector('.nav-btn').setAttribute('aria-expanded', 'false');
+  });
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
 </script>
 </body>
 </html>
