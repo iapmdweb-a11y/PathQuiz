@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PathQuiz &middot; IAPMD</title>
+<meta name="description" content="PathQuiz &mdash; test your knowledge and sharpen your diagnostic skills with interactive cytology and dermatopathology quizzes.">
+
+<meta property="og:title" content="PathQuiz">
+<meta property="og:description" content="Test Your Knowledge &bull; Sharpen Your Diagnostic Skills">
+<meta property="og:type" content="website">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ink:#1b1b2a;
+    --ink-2:#2f2f45;
+    --paper:#f5f6f8;
+    --card:#ffffff;
+    --muted:#6b7280;
+    --line:#e4e7ec;
+    --accent:#7c3aed;
+    --accent-2:#2563eb;
+    --cyto:#2563eb;
+    --derm:#c1587f;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+
+  .topbar{
+    background:var(--ink);color:#fff;border-bottom:3px solid var(--accent);
+    position:sticky;top:0;z-index:20;
+  }
+  .topbar-inner{display:flex;align-items:center;gap:14px;padding:12px 0}
+  .logo{height:34px;width:auto;display:block}
+  .brand{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.5rem;font-weight:700;letter-spacing:.01em;line-height:1}
+  .brand small{display:block;font-family:'Inter',sans-serif;font-size:.6rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;opacity:.6;margin-top:4px}
+  .topbar nav{margin-left:auto;display:flex;gap:18px;flex-wrap:wrap}
+  .topbar nav a{color:rgba(255,255,255,.72);text-decoration:none;font-size:.78rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:6px 0;border-bottom:2px solid transparent}
+  .topbar nav a:hover{color:#fff;border-bottom-color:var(--accent)}
+
+  .hero{padding:52px 0 34px;text-align:center}
+  .hero h1{
+    font-family:'Cormorant Garamond',Georgia,serif;
+    font-size:clamp(2.6rem,7vw,4.2rem);
+    font-weight:600;line-height:1;margin:0 0 12px;letter-spacing:-.01em;
+  }
+  .hero p{margin:0;color:var(--muted);font-size:.8rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase}
+  .hero .rule{width:56px;height:2px;background:var(--accent);margin:22px auto 0;border-radius:2px}
+
+  section{margin-bottom:52px}
+  .sec-head{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+  .sec-head h2{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.9rem;font-weight:600;margin:0;line-height:1}
+  .sec-head span{color:var(--muted);font-size:.78rem;font-weight:500}
+  .sec-tag{font-size:.62rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;padding:4px 10px;border-radius:999px;margin-left:auto}
+  .sec-tag.cyto{background:rgba(37,99,235,.1);color:var(--cyto)}
+  .sec-tag.derm{background:rgba(193,88,127,.12);color:var(--derm)}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px}
+
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;
+    display:flex;flex-direction:column;text-decoration:none;color:inherit;
+    transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease;
+  }
+  .card:hover{transform:translateY(-4px);box-shadow:0 18px 40px -18px rgba(27,27,42,.35);border-color:#d3d7de}
+  .card:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  .thumb{position:relative;aspect-ratio:16/10;background:#0f1117;overflow:hidden}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease}
+  .card:hover .thumb img{transform:scale(1.05)}
+  .thumb .badge{
+    position:absolute;left:12px;top:12px;background:rgba(255,255,255,.94);color:var(--ink);
+    font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    padding:5px 10px 5px 7px;border-radius:999px;
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  .thumb .badge svg{width:16px;height:16px;flex:none;display:block}
+  .qi{width:16px;height:16px;flex:none;display:block}
+  .body{padding:18px 18px 20px;display:flex;flex-direction:column;gap:6px;flex:1}
+  .date{color:var(--muted);font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+  .body h3{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.5rem;font-weight:600;margin:0;line-height:1.1}
+  .desc{color:var(--muted);font-size:.85rem;margin:2px 0 0}
+  .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:14px}
+  .chip{font-size:.68rem;font-weight:600;background:#f1f3f7;color:var(--ink-2);border-radius:999px;padding:4px 10px}
+  .go{margin-left:auto;color:var(--accent);font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+
+  .empty{background:var(--card);border:1px dashed #cbd2dc;border-radius:18px;padding:34px;text-align:center;color:var(--muted)}
+  .empty strong{display:block;font-family:'Cormorant Garamond',serif;font-size:1.25rem;color:var(--ink);margin-bottom:6px}
+  .empty code{background:#f1f3f7;border-radius:6px;padding:2px 7px;font-size:.78rem}
+
+  footer{background:var(--ink);color:rgba(255,255,255,.66);padding:30px 0;font-size:.78rem}
+  .foot-inner{display:flex;gap:16px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  footer a{color:#fff;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.3)}
+  footer a:hover{border-bottom-color:var(--accent)}
+
+  @media (max-width:640px){
+    .topbar nav{display:none}
+    .hero{padding:38px 0 26px}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <img class="logo" src="https://cdn1.artcltn.com/storage/25635/a233962a-ffe4-4e35-a0f2-86c48caa4ff2/smoothed-logo-1.png" alt="IAPMD">
+    <div class="brand">PathQuiz<small>IAP-MD</small></div>
+    <nav>
+      <a href="#cytology">Cytology</a>
+      <a href="#dermpath">DermPath</a>
+      <a href="https://www.iapmd.net/path-quiz" target="_blank" rel="noopener">iapmd.net</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <h1>PathQuiz</h1>
+    <p>Test Your Knowledge &bull; Sharpen Your Diagnostic Skills</p>
+    <div class="rule"></div>
+  </div>
+
+  <div class="wrap" id="app"></div>
+</main>
+
+<footer>
+  <div class="wrap foot-inner">
+    <div>PathQuiz &mdash; International Academy of Pathology, Malaysian Division</div>
+    <div>Dr. AbKadir Rifaei Rashid Khairi, P.C.M. &middot;
+      <a href="https://www.iapmd.net/path-quiz" target="_blank" rel="noopener">iapmd.net/path-quiz</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ------------------------------------------------------------------
+   TO ADD A NEW QUIZ: append one object to SECTIONS below. Nothing else.
+   ------------------------------------------------------------------ */
+const SECTIONS = [
+  {
+    id: 'cytology',
+    title: 'CytoQuiz',
+    tag: 'Cytology',
+    blurb: 'Test Your Diagnostic Skills &bull; Master Cytology',
+    items: [
+      {
+        file: 'cytology-bethesda-battle.html',
+        title: 'Bethesda Battle',
+        desc: 'Cervical cytology quiz on the Bethesda System for Reporting Cervical Cytology.',
+        badge: 'CytoQuiz',
+        icon: 'icons/cyto-quiz.svg',
+        date: 'September 24, 2026',
+        image: 'https://cdn1.artcltn.com/storage/25635/a233962a-ffe4-4e35-a0f2-86c48caa4ff2/bethesda_battle6ab5752cc4300.jpg',
+        chips: ['21 questions', 'Timed', 'Explanations']
+      }
+    ]
+  },
+  {
+    id: 'dermpath',
+    title: 'DermPath Quiz',
+    tag: 'Dermatopathology',
+    blurb: 'Test Your Diagnostic Skills &bull; Learn Dermatopathology',
+    items: [
+      {
+        file: 'dermpath-melanoma-variants.html',
+        title: 'Melanoma Variants',
+        desc: 'Flashcards on 21 melanoma subtypes with diagnostic clues, morphology and molecular notes.',
+        badge: 'Dermpath Quiz',
+        icon: 'icons/dermpath-quiz.svg',
+        date: 'September 12, 2025',
+        image: 'https://cdn1.artcltn.com/storage/25635/a233962a-ffe4-4e35-a0f2-86c48caa4ff2/quiz2.png',
+        chips: ['21 cards', 'Image-based', 'Shuffle']
+      }
+    ]
+  }
+];
+
+function cardHTML(item) {
+  const chips = (item.chips || [])
+    .map(c => '<span class="chip">' + c + '</span>')
+    .join('');
+  const icon = item.icon
+    ? '<img class="qi" src="' + item.icon + '" alt="" aria-hidden="true">'
+    : '';
+  return `
+    <a class="card" href="${item.file}">
+      <div class="thumb">
+        <img src="${item.image}" alt="${item.title}" loading="lazy">
+        <span class="badge">${icon}${item.badge}</span>
+      </div>
+      <div class="body">
+        <span class="date">${item.date}</span>
+        <h3>${item.title}</h3>
+        <p class="desc">${item.desc}</p>
+        <div class="meta">${chips}<span class="go">Start &rarr;</span></div>
+      </div>
+    </a>`;
+}
+
+document.getElementById('app').innerHTML = SECTIONS.map(sec => {
+  const slug = sec.tag.toLowerCase().replace(/[^a-z]/g, '');
+  const cards = sec.items.length
+    ? `<div class="grid">${sec.items.map(cardHTML).join('')}</div>`
+    : `<div class="empty"><strong>No quizzes yet</strong>Add an entry to <code>SECTIONS</code> to publish one here.</div>`;
+
+  return `
+    <section id="${sec.id}">
+      <div class="sec-head">
+        <h2>${sec.title}</h2>
+        <span>${sec.blurb}</span>
+        <span class="sec-tag ${slug}">${sec.tag}</span>
+      </div>
+      ${cards}
+    </section>`;
+}).join('');
+</script>
+</body>
+</html>

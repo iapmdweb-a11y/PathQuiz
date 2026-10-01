@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Melanoma Variants Quiz | Pathology Revision</title>
+    
+    <meta property="og:title" content="Melanoma Variants Quiz">
+    <meta property="og:description" content="Test your pathology knowledge with this interactive Melanoma variants flashcard quiz.">
+    <meta property="og:image" content="https://i.imgur.com/ofidYsZ.png"> 
+    <meta property="og:type" content="website">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        #quiz-app-root { min-height: 800px; width: 100%; overflow-x: hidden; }
+        .flashcard { perspective: 1000px; cursor: pointer; }
+        .flashcard-inner {
+            position: relative; width: 100%; height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d;
+        }
+        .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+        .flashcard-front, .flashcard-back {
+            position: absolute; width: 100%; height: 100%;
+            backface-visibility: hidden; border-radius: 24px;
+            padding: 24px; display: flex; flex-direction: column;
+        }
+        .flashcard-back { transform: rotateY(180deg); }
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+        #quiz-app-root h1, #quiz-app-root p, #quiz-app-root h3 { margin: 0; line-height: normal; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans min-h-screen">
+    <div id="quiz-app-root" class="max-w-2xl mx-auto p-4 sm:p-8"></div>
+ 
+    <script>
+        (function() {
+            const melanomas = [
+                { id: 1, name: "Superficial Spreading Melanoma (Low CSD)", image: "https://i.imgur.com/zLIkKdn.jpeg", clue: "Look for ABCDE changes in a flat or slightly raised lesion; common on the trunk and legs.", desc: "The most common type (70%). Grows along the top layer of skin (radial growth) before becoming invasive. <br><br><strong>Morphology:</strong> Characterized by prominent pagetoid spread of atypical melanocytes.<br><strong>Note:</strong> Often associated with BRAF V600E mutations.", caption: "Courtesy of Bethany R. Rohr, M.D." },
+                { id: 2, name: "Nodular Melanoma", image: "https://i.imgur.com/YesN3mG.jpeg", clue: "A dark, dome-shaped 'blueberry' like nodule that grows vertically and rapidly.", desc: "Aggressive variant that lacks a radial growth phase. Grows deep almost immediately.<br><br><strong>Morphology:</strong> Purely vertical growth from the start.<br><strong>Note:</strong> Most aggressive clinical course due to early deep dermal invasion.", caption: "" },
+                { id: 3, name: "Lentigo Maligna Melanoma (High CSD)", image: "https://i.imgur.com/tYOXN1A.jpeg", clue: "Large, tan-brown, flat lesion on chronically sun-exposed skin of the elderly.", desc: "Arises from 'Hutchinson's freckle.' Typically on the face/neck of older patients.<br><br><strong>Morphology:</strong> Atypical melanocytes along the dermo-epidermal junction of thinned skin.<br><strong>Note:</strong> Background of solar elastosis is key.", caption: "Courtesy of Joseph Gillam, M.D., Jennifer Crimmins, M.D. and Mark Mochel, M.D." },
+                { id: 4, name: "Acral Lentiginous Melanoma", image: "https://i.imgur.com/IqbCNn0.jpeg", clue: "Pigmented band in a nail (Hutchinson's sign) or lesion on palms/soles.", desc: "Most common form in people with darker skin tones. Not related to UV exposure.<br><br><strong>Morphology:</strong> Lentiginous proliferation in the basal layer of glabrous skin.<br><strong>Note:</strong> High incidence of KIT mutations.", caption: "Courtesy of Carlos A. Torres-Cabala, M.D." },
+                { id: 5, name: "Nevoid Melanoma", image: "https://i.imgur.com/SxBEvrX.jpeg", clue: "Clinically mimics a common mole (nevus) but shows subtle malignancy under the microscope.", desc: "A histological 'look-alike.' Requires high suspicion to distinguish from a benign nevus.<br><br><strong>Morphology:</strong> Resembles small, benign-looking cells.<br><strong>Note:</strong> 'The Deceiver.' Look for lack of maturation and dermal mitoses.", caption: "Courtesy of Antonina Kalmykova, M.D. and Phillip H. McKee, M.D." },
+                { id: 6, name: "Mucosal Melanoma", image: "https://i.imgur.com/b7LX8Zc.jpeg", clue: "Arises on internal surfaces: mouth, nose, or genital tract.", desc: "Rare and aggressive. Often asymptomatic until advanced.<br><br><strong>Morphology:</strong> Arises in head/neck, anorectal, or vulvovaginal mucosa.<br><strong>Note:</strong> Frequently involves KIT or SF3B1 mutations.", caption: "Courtesy of Janira M. Navarro Sanchez, M.D." },
+                { id: 7, name: "Small Cell Melanoma", image: "https://i.imgur.com/42f8YAX.png", clue: "Histologically resembles neuroendocrine or oat-cell carcinoma.", desc: "Rare variant with small, round cells. Often arises in giant congenital nevi.<br><br><strong>Morphology:</strong> Nuclei only 2-3x RBC diameter (~20um). Nuclear contact moulding.<br><strong>Note:</strong> Requires IHC to confirm melanocytic origin.", caption: "Courtesy of Cynthia M Magro, M.D. A Neil Crowson, M.D. & Martin C Mihm Jr ,M.D." },
+                { id: 8, name: "Desmoplastic Melanoma", image: "https://i.imgur.com/gF9T04W.png", clue: "A firm, scar-like plaque or nodule; often lacks pigment.", desc: "Frequently on head/neck. Notorious for growing along nerves (neurotropism).<br><br><strong>Morphology:</strong> Spindle cells in a densely collagenous (fibrotic) stroma.<br><strong>Note:</strong> Often HMB-45/Melan-A negative; SOX10/S100 are more reliable.", caption: "Courtesy of Cynthia M Magro, M.D. A Neil Crowson, M.D. & Martin C Mihm Jr ,M.D." },
+                { id: 9, name: "Uveal Melanoma", image: "https://i.imgur.com/i51WAwp.jpeg", clue: "Primary malignancy occurring within the iris or choroid of the eye.", desc: "Most common primary eye cancer in adults. Highly prone to liver metastasis.<br><br><strong>Morphology:</strong> Arises from the uveal tract (iris, ciliary body, choroid).<br><strong>Note:</strong> Genetically distinct (GNAQ/GNA11 mutations).", caption: "Courtesy of Lynn R. Schoenfield, M.D." },
+                { id: 10, name: "Amelanotic Melanoma", image: "https://i.imgur.com/gLiVe8V.png", clue: "Red or pink lesion; 'The Great Masquerader' because it lacks brown pigment.", desc: "Often misdiagnosed as BCC or pyogenic granuloma.<br><br><strong>Morphology:</strong> Melanocytes show little to no melanin production.<br><strong>Note:</strong> Requires IHC (SOX10/S100) for diagnosis.", caption: "Courtesy of Dr. Geise Rezende Paiva & Dr. Thadeu Santos Silva" },
+                { id: 11, name: "Animal Type Melanoma", image: "https://i.imgur.com/5XIMZvD.png", clue: "Extreme pigment density; blue-black appearance; similar to melanoma in horses.", desc: "Also known as Pigment Synthesizing Melanoma. Usually less aggressive.<br><br><strong>Morphology:</strong> Densely pigmented, heavily melanized cells.<br><strong>Note:</strong> Clinically indolent but can metastasize to nodes.", caption: "Courtesy of Cynthia M Magro, M.D. A Neil Crowson, M.D. & Martin C Mihm Jr ,M.D." },
+                { id: 12, name: "Balloon Cell Melanoma", image: "https://i.imgur.com/WOtTNQG.png", clue: "Microscopically composed of cells with large, clear, 'swollen' cytoplasm.", desc: "Rare variant. Distinguished from balloon cell nevi by nuclear atypia and mitoses.<br><br><strong>Morphology:</strong> Large cells with clear, vacuolated cytoplasm.<br><strong>Note:</strong> Often shows reduced Melan-A/HMB45 due to organelle degeneration.", caption: "Courtesy of Yanan Fang, M.D." },
+                { id: 13, name: "Myxoid Melanoma", image: "https://i.imgur.com/2IWaOb2.jpeg", clue: "Features a gelatinous, 'slimy' background (stroma) on pathology.", desc: "Rare variant. Background can make it look like other soft-tissue tumors.<br><br><strong>Morphology:</strong> Atypical cells in a prominent myxoid (mucoid) stroma.<br><strong>Note:</strong> Stroma stains positive with Alcian blue.", caption: "Courtesy of ilmelanoma.com" },
+                { id: 14, name: "Metaplastic Melanoma (Chondroid)", image: "https://i.imgur.com/445NDIn.jpeg", clue: "Melanoma differentiates into cartilage-like tissue.", desc: "Extremely aggressive. Cells transform into different cellular types.<br><br><strong>Morphology:</strong> Differentiation into cartilage (chondroid).<br><strong>Note:</strong> Often associated with desmoplastic melanoma.", caption: "Courtesy of Bennett Barroso de Carvalho, M.D." },
+                { id: 15, name: "Metaplastic Melanoma (Osteoid)", image: "https://i.imgur.com/v0HCJ58.jpeg", clue: "Melanoma differentiates into bone-like tissue.", desc: "Extremely aggressive. Cells transform into different cellular types.<br><br><strong>Morphology:</strong> Differentiation into bone (osteoid).<br><strong>Note:</strong> Often associated with desmoplastic melanoma.", caption: "Courtesy of Bennett Barroso de Carvalho, M.D." },
+                { id: 16, name: "Malignant Blue Nevus", image: "https://i.imgur.com/lkFq8IQ.png", clue: "Deep blue-black lesion arising from a pre-existing blue mole.", desc: "Rare. Typically begins within a cellular blue nevus, often on the scalp.<br><br><strong>Morphology:</strong> Arises in blue nevus with necrosis and high mitoses.<br><strong>Note:</strong> Often involves GNAQ/GNA11 mutations.", caption: "Courtesy of Cynthia M Magro, M.D. A Neil Crowson, M.D. & Martin C Mihm Jr ,M.D." },
+                { id: 17, name: "Signet Ring Cell Melanoma", image: "https://i.imgur.com/VcJ6ZLC.jpeg", clue: "Cells have nuclei pushed to the side, looking like a ring on a finger.", desc: "Usually seen in metastatic sites. Can be confused with adenocarcinoma.<br><br><strong>Morphology:</strong> Peripherally displaced nuclei due to cytoplasmic inclusions.<br><strong>Note:</strong> Inclusions may be vimentin-rich.", caption: "Courtesy of plasticsurgerykey.com" },
+                { id: 18, name: "Rhabdoid Melanoma", image: "https://i.imgur.com/GMoqo0x.jpeg", clue: "Highly aggressive cells that resemble muscle cells (rhabdomyoblasts).", desc: "High-grade histological pattern. Usually indicates a very poor clinical outcome.<br><br><strong>Morphology:</strong> Eccentric nuclei and prominent eosinophilic inclusions.<br><strong>Note:</strong> Extremely aggressive; may show SMARCB1 loss.", caption: "Contributed by Gerardo Cazzato, M.D., Ph.D." },
+                { id: 19, name: "Dedifferentiated Melanoma", image: "https://i.imgur.com/TMk3pGz.jpeg", clue: "A biphasic tumor showing a typical melanoma adjacent to a high-grade undifferentiated sarcoma-like area.", desc: "A rare phenomenon where a conventional melanoma loses its melanocytic markers.<br><br><strong>Morphology:</strong> Loss of S100/Melan-A in the dedifferentiated component.<br><strong>Note:</strong> Usually occurs in recurrences or metastases.", caption: "Courtesy of Gerardo Cazzato, M.D., Ph.D." },
+                { id: 20, name: "Verrucous Melanoma", image: "https://i.imgur.com/gnib5Qp.jpeg", clue: "Lesion presents with a warty, hyperkeratotic surface, mimicking a seborrheic keratosis.", desc: "An uncommon clinical variant where the melanoma exhibits marked epidermal hyperplasia.<br><br><strong>Morphology:</strong> Prominent papillomatosis and hyperkeratosis.<br><strong>Note:</strong> High risk of misdiagnosis as a benign keratosis.", caption: "Courtesy of Gerardo Cazzato, M.D., Ph.D." },
+                { id: 21, name: "Spitzoid Melanoma", image: "https://i.imgur.com/EVEZoHO.jpeg", clue: "Pink, dome-shaped nodule in a younger person; mimics a Spitz nevus.", desc: "Very difficult to diagnose. Often requires molecular testing to prove malignancy.<br><br><strong>Morphology:</strong> Large epithelioid or spindle cells mimicking Spitz Nevus.<br><strong>Note:</strong> Look for deep mitoses and significant atypia.", caption: "" }
+            ];
+ 
+            let activeList = [...melanomas];
+            let currentIndex = 0;
+            let isFlipped = false;
+ 
+            window.toggleFlip = function() { isFlipped = !isFlipped; render(); };
+            window.changeCard = function(e, dir) {
+                if(e) e.stopPropagation();
+                const nextIdx = currentIndex + dir;
+                if(nextIdx >= 0 && nextIdx < activeList.length) {
+                    currentIndex = nextIdx; isFlipped = false; render();
+                }
+            };
+            window.shuffleList = function() {
+                activeList.sort(() => Math.random() - 0.5);
+                currentIndex = 0; isFlipped = false; render();
+            };
+            window.downloadApp = function() {
+                const docContent = `<!DOCTYPE html>\n<html>\n${document.head.outerHTML}\n${document.body.outerHTML}\n</html>`;
+                const blob = new Blob([docContent], {type: 'text/html'});
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'Melanoma_Quiz.html';
+                link.click();
+            };
+ 
+            function render() {
+                const current = activeList[currentIndex];
+                const progress = ((currentIndex + 1) / activeList.length) * 100;
+                const app = document.getElementById('quiz-app-root');
+                if(!app) return;
+ 
+                app.innerHTML = `
+                    <div class="text-center mb-6">
+                        <h1 class="text-3xl font-black text-slate-900 mb-2 tracking-tight">Melanoma Variants</h1>
+                        <p class="text-slate-500 text-xs font-bold uppercase tracking-widest">Interactive Pathology Quiz</p>
+                    </div>
+ 
+                    <div class="bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-slate-100">
+                        <div class="p-6 sm:p-10">
+                            <div class="flex justify-between items-center text-[10px] font-black text-slate-400 mb-4 tracking-widest">
+                                <button onclick="shuffleList()" class="hover:text-blue-600 transition flex items-center gap-1">SHUFFLE</button>
+                                <span>CARD ${currentIndex + 1} / ${activeList.length}</span>
+                            </div>
+                            <div class="w-full bg-slate-100 h-1.5 rounded-full mb-8">
+                                <div class="bg-blue-600 h-full rounded-full transition-all duration-700" style="width:${progress}%"></div>
+                            </div>
+ 
+                            <div class="flashcard ${isFlipped ? 'flipped' : ''} h-[580px]" onclick="toggleFlip()">
+                                <div class="flashcard-inner">
+                                    <div class="flashcard-front bg-white border border-slate-50 shadow-sm flex flex-col items-center justify-between">
+                                        <div class="w-full flex-grow flex flex-col items-center justify-center overflow-hidden rounded-xl bg-slate-950 p-2">
+                                            <img src="${current.image}" class="max-h-[85%] max-w-full object-contain">
+                                            <p class="text-[10px] text-slate-400 mt-2 text-center italic">${current.caption || ""}</p>
+                                        </div>
+                                        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 w-full mt-6">
+                                            <p class="text-slate-400 text-[10px] font-black uppercase mb-2">Diagnostic Clue:</p>
+                                            <p class="text-slate-800 text-sm font-semibold italic">"${current.clue}"</p>
+                                        </div>
+                                        <div class="mt-4 animate-pulse text-blue-600 font-black text-[10px] uppercase">Tap to reveal report</div>
+                                    </div>
+
+                                    <div class="flashcard-back bg-slate-900 p-8 text-white shadow-inner flex flex-col">
+                                        <div class="flex-grow overflow-y-auto custom-scroll pr-2 mb-4">
+                                            <span class="text-blue-400 text-[10px] font-black uppercase">Diagnosis</span>
+                                            <h3 class="text-white font-black mb-6 border-b border-slate-700 pb-4 text-2xl uppercase mt-2">${current.name}</h3>
+                                            <div class="text-slate-300 leading-relaxed text-sm">
+                                                ${current.desc}
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-auto pt-4 border-t border-slate-700 flex items-center justify-between gap-4">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://i.imgur.com/ofidYsZ.png" class="h-12 w-auto" alt="Logo">
+                                                <div>
+                                                    <p class="text-white font-bold text-xs leading-tight">Dr. AbKadir Rifaei Rashid Khairi, P.C.M.</p>
+                                                    <span class="text-slate-400 text-[8px] font-black tracking-widest uppercase">PathologyQuiz Creator</span>
+                                                </div>
+                                            </div>
+                                            <img src="https://i.imgur.com/EgKtEil.png" class="w-10 h-10 rounded-full border-2 border-blue-500 bg-slate-800 object-cover shrink-0" alt="Profile">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 p-6 flex justify-between gap-4 border-t border-slate-100">
+                            <button onclick="changeCard(event, -1)" class="flex-1 py-4 font-black text-slate-400" ${currentIndex === 0 ? 'disabled' : ''}>← PREV</button>
+                            <button onclick="changeCard(event, 1)" class="flex-1 py-4 bg-slate-900 text-white rounded-2xl font-black shadow-lg" ${currentIndex === activeList.length -1 ? 'hidden' : ''}>NEXT →</button>
+                        </div>
+                    </div>
+                `;
+            }
+ 
+            if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", render); } else { render(); }
+        })();
+    </script>
+</body>
+</html>
